@@ -118,7 +118,8 @@ function M.get_completions(callback)
     return
   end
 
-  local params = lsp.util.make_position_params()
+  local params = lsp.util.make_position_params(0, 'utf-16')
+  -- vim.notify(vim.print(params))
   params.model = utils.get_model()
   params.backend = config.get().backend
   params.url = utils.get_url()
@@ -202,11 +203,24 @@ function M.setup()
     cmd = { llm_ls_path }
   end
 
+  local default_capabilities =
+  -- vim.lsp.protocol.make_client_capabilities()
+  {
+      general = {
+      positionEncodings = {
+        'utf-16',
+        -- 'utf-8',
+      },
+    }
+  }
+
   local client_id = lsp.start_client({
     name = "llm-ls",
     cmd = cmd,
     cmd_env = config.get().lsp.cmd_env,
     root_dir = vim.fs.dirname(vim.fs.find({ ".git" }, { upward = true })[1]),
+    offset_encoding = "utf-16",
+    capabilities = default_capabilities,
   })
 
   if client_id == nil then
